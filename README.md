@@ -23,3 +23,7 @@ The public XSTest, OR-Bench Hard, and OR-Bench Toxic CSVs are already in `data/r
 ## Collaboration
 
 Use GitHub pull requests for code, configurations, documentation, and small summary results. Keep weights, raw benchmark data, per-example model outputs, credentials, and local environments out of Git. Record the exact dataset selection and model revision used for each experiment.
+
+## Baseline code
+
+The shared data split, inference, Surgical, AdaSteer, and scoring entry points are described in [docs/BASELINES.md](docs/BASELINES.md). Adding the code does not start model runs; each experiment is an explicit command.

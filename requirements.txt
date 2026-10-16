@@ -1,0 +1,8 @@
+# Match the published AdaSteer implementation; install CUDA-enabled PyTorch for the server first.
+torch==2.4.1
+transformers==4.46.3
+accelerate>=0.34,<2
+numpy<2
+scikit-learn>=1.4,<2
+tqdm>=4.66,<5
+safetensors>=0.4,<1

@@ -1,5 +1,6 @@
 # Large or licensed research assets stay on the server.
 /models
+/third_party/
 /data/raw/
 /data/splits/
 /results/raw/

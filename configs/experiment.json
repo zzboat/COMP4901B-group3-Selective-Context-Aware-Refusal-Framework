@@ -1,0 +1,14 @@
+{
+  "seed": 42,
+  "model_path": "models/Meta-Llama-3.1-8B-Instruct",
+  "judge_path": "models/Llama-Guard-3-1B",
+  "max_new_tokens": 128,
+  "dtype": "float16",
+  "surgical": {
+    "train_per_group": 128,
+    "validation_per_group": 32,
+    "prompt_token_offsets": [-1, -2, -3],
+    "orthogonalization": 1.0,
+    "max_first_token_kl": 0.2
+  }
+}
