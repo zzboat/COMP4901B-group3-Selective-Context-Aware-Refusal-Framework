@@ -64,6 +64,11 @@ def main() -> None:
         "model_manifest_sha256": file_sha256(ROOT / "configs/model_manifest.json"),
         "surgical_vector_sha256": file_sha256(args.surgical_vector) if args.method == "surgical" else None,
         "adasteer_upstream_commit": UPSTREAM_COMMIT if args.method == "adasteer" else None,
+        "adasteer_generator_sha256": file_sha256(args.adasteer_checkout / "adasteer/src/main_generate_steering_multi_adasteer.py") if args.method == "adasteer" else None,
+        "adasteer_vector_sha256s": ({
+            name: file_sha256(args.adasteer_checkout / "vectors/llama31-8b-instruct" / name)
+            for name in ("RD/mean_diff.pkl", "RD/class_a.pkl", "RD/class_b.pkl", "HD/proj.pkl", "HD/class_a.pkl", "HD/class_b.pkl")
+        } if args.method == "adasteer" else None),
         "output_sha256": file_sha256(output),
     }
     output.with_suffix(".manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")

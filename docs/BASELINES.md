@@ -14,18 +14,22 @@ python scripts/prepare_splits.py
 
 ## Dependency and author-code setup
 
-Use an isolated Python environment. The AdaSteer authors specify Python 3.9, PyTorch 2.4.1, and Transformers 4.46.3. Their Llama implementation requests FlashAttention 2. On the RTX 3090, use batch size 1; install a CUDA-compatible PyTorch and FlashAttention build for that host. Do not change the server's shared Python installation.
+Use the isolated server environment; do not change system Python. Setup and readiness commands:
 
 ```bash
-git clone https://github.com/mainlp/False-Refusal-Mitigation.git third_party/False-Refusal-Mitigation
-git -C third_party/False-Refusal-Mitigation checkout 916dcac6fb1c5fcccc9581471370645763c65ce6
-git clone https://github.com/MuyuenLP/AdaSteer.git third_party/AdaSteer
-git -C third_party/AdaSteer checkout 2a02b78bea83df497dd3495e7a0dda4580f2dd53
-python -m pip install -r requirements.txt
-python -m pip install -e third_party/AdaSteer
+source /base/mambaforge/etc/profile.d/conda.sh
+conda activate /root/shared-nvme/COMP4091B-baselines-py39
+python -m pip install torch==2.4.1 --index-url https://download.pytorch.org/whl/cu121
+python -m pip install -r requirements-py39-cu121.lock --index-url https://pypi.tuna.tsinghua.edu.cn/simple
+python scripts/fetch_author_assets.sh
+python scripts/check_readiness.py
 ```
 
-`third_party/` is ignored by Git. Record any changes to these author checkouts in the report. Their repositories contain the Surgical harmful/harmless reference splits and AdaSteer's Llama 3.1 vectors; no additional benchmark test prompts are needed for vector fitting. Check semantic near-duplicates between reference data and held-out tests before making a generalization claim.
+The AdaSteer authors specify Python 3.9, PyTorch 2.4.1, and Transformers 4.46.3. The prepared CUDA build is 12.1. The RTX 3090 has 24 GiB; use batch size 1. FlashAttention is not required because the AdaSteer loader has the documented SDPA compatibility patch. This one environment serves every baseline: original and rewrite controls use the shared inference stack, Surgical also uses scikit-learn for vector selection, and AdaSteer uses the pinned author code and vectors.
+
+`third_party/` is ignored by Git. The Surgical files are limited to the four harmful/harmless reference splits from pinned commit `916dcac6fb1c5fcccc9581471370645763c65ce6`. AdaSteer's runtime package and only the vectors loaded by its Llama 3.1 implementation are staged under ignored `third_party/AdaSteer/`; `UPSTREAM_COMMIT` records pinned source revision `2a02b78bea83df497dd3495e7a0dda4580f2dd53`.
+
+AdaSteer hard-codes FlashAttention 2, which is optional and can be difficult to build on a shared RTX 3090 host. The prepared checkout applies a one-line compatibility patch to select PyTorch SDPA (`attn_implementation="sdpa"`) instead. This changes the attention kernel, not AdaSteer's steering method; record it in every result manifest. Check semantic near-duplicates between reference data and held-out tests before making a generalization claim.
 
 ## Surgical: adapted method reproduction
 

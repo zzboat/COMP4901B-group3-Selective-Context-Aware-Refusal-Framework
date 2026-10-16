@@ -15,9 +15,15 @@ def run_adasteer(root: Path, upstream: Path, rows: list[dict], split: str, model
     upstream = upstream.resolve()
     if not (upstream / "adasteer/src/main_generate_steering_multi_adasteer.py").is_file():
         raise FileNotFoundError(f"AdaSteer author checkout missing: {upstream}")
-    commit = subprocess.check_output(["git", "-C", str(upstream), "rev-parse", "HEAD"], text=True).strip()
+    revision_file = upstream / "UPSTREAM_COMMIT"
+    if not revision_file.is_file():
+        raise FileNotFoundError(f"AdaSteer source revision marker missing: {revision_file}")
+    commit = revision_file.read_text(encoding="utf-8").strip()
     if commit != UPSTREAM_COMMIT:
         raise ValueError(f"AdaSteer checkout must be pinned to {UPSTREAM_COMMIT}; found {commit}")
+    generator = upstream / "adasteer/src/main_generate_steering_multi_adasteer.py"
+    if 'attn_implementation="sdpa"' not in generator.read_text(encoding="utf-8"):
+        raise ValueError("AdaSteer must use the documented SDPA compatibility patch")
     vector = upstream / "vectors/llama31-8b-instruct/RD/mean_diff.pkl"
     if not vector.is_file():
         raise FileNotFoundError(vector)
