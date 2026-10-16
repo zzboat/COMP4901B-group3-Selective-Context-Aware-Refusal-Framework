@@ -20,6 +20,16 @@
       "source": "https://huggingface.co/datasets/bench-llm/or-bench/blob/main/or-bench-toxic.csv",
       "rows": 655,
       "sha256": "3be45901faae3b4b2b51bf7f8a2784c1650a1cc8c631dbc8b171d5312d4e0057"
+    },
+    {
+      "name": "SORRY-Bench 2025/03 base",
+      "path": "data/raw/sorry-bench-202503/question.jsonl",
+      "source": "https://huggingface.co/datasets/sorry-bench/sorry-bench-202503",
+      "revision": "612a4e1f45db8adf884fa62318ddf9fa1c6e75e9",
+      "rows": 440,
+      "sha256": "001213f6f819f3b4df5a0ef488b0533bce05e4ece7607ab189499cff93461b2f",
+      "restricted": true,
+      "note": "Raw prompts are not committed or redistributed."
     }
   ]
 }

@@ -35,6 +35,18 @@
           "sha256": "e72017dbbe89c1232dcbc4a74ce0c389db5b468c42afd05850347b2a8c5f6b09"
         }
       }
+    },
+    {
+      "role": "content_safety_verifier",
+      "repository": "https://modelscope.cn/models/LLM-Research/Llama-Guard-3-1B",
+      "revision": "master",
+      "local_directory": "models/Llama-Guard-3-1B",
+      "weights": {
+        "model.safetensors": {
+          "bytes": 2996982344,
+          "sha256": "e010146ce3209c8e1485021cbea5462f3f04461be924a066b6c0d80085b17957"
+        }
+      }
     }
   ]
 }

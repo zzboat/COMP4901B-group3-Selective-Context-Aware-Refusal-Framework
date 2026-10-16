@@ -18,7 +18,7 @@ Training-free, uncertainty-aware refusal repair for safety-aligned LLMs. The wor
 
 ## Assets
 
-The public XSTest, OR-Bench Hard, and OR-Bench Toxic CSVs are already in `data/raw/`. Their sources and checksums are in `data/manifest.json`. The requested Llama 3.1 8B Instruct and Prompt Guard 2 86M weights are sourced from ModelScope. The optional SORRY-Bench requires the researcher's own Hugging Face access approval. See `docs/ASSETS.md`.
+The public XSTest, OR-Bench Hard, and OR-Bench Toxic CSVs are already in `data/raw/`. Their sources and checksums are in `data/manifest.json`. Llama 3.1 8B Instruct, Prompt Guard 2 86M, and Llama Guard 3 1B weights are sourced from ModelScope. The SORRY-Bench base dataset was obtained with approved Hugging Face access. See `docs/ASSETS.md`.
 
 ## Collaboration
 

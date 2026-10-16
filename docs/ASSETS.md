@@ -16,13 +16,14 @@ The full CSVs are downloaded. Their exact SHA-256 hashes are recorded in `data/m
 | --- | --- | --- | --- |
 | Main generator | Meta Llama 3.1 8B Instruct | https://modelscope.cn/models/LLM-Research/Meta-Llama-3.1-8B-Instruct | `models/Meta-Llama-3.1-8B-Instruct/` |
 | Prompt-attack detector | Llama Prompt Guard 2 86M | https://modelscope.cn/models/LLM-Research/Llama-Prompt-Guard-2-86M | `models/Llama-Prompt-Guard-2-86M/` |
+| Content-safety verifier | Llama Guard 3 1B | https://modelscope.cn/models/LLM-Research/Llama-Guard-3-1B | `models/Llama-Guard-3-1B/` |
 
 Model files are held in `/root/shared-nvme/COMP4091B-models/`, which `models/` links to. Download the root Safetensors and tokenizer/config files for Llama 3.1; exclude its `original/` folder to avoid a duplicate weight format. These weights are ignored by Git.
 
-Prompt Guard 2 86M detects prompt injection and jailbreak attempts. Its labels do not directly indicate whether an ordinary user request is harmful. A separate content-safety verifier must be selected and evaluated for the framework's safety gate; Llama Guard 3 1B is one candidate, pending project choice.
+Prompt Guard 2 86M detects prompt injection and jailbreak attempts. Its labels do not directly indicate whether an ordinary user request is harmful. Llama Guard 3 1B is the selected content-safety verifier. Its error rate on the project benchmarks still needs to be measured before using its output as a gate.
 
 ## Restricted harm-side data
 
-The optional SORRY-Bench 2025/03 dataset is at https://huggingface.co/datasets/sorry-bench/sorry-bench-202503 . Access requires accepting its terms. Its base `question.jsonl` has 440 prompts; the plan calls for a documented 220-prompt subset. The dataset license prohibits third-party transfers. Keep raw prompts out of GitHub and do not distribute copies to teammates who lack their own access.
+The optional SORRY-Bench 2025/03 dataset is at https://huggingface.co/datasets/sorry-bench/sorry-bench-202503 . Its base `question.jsonl` has 440 prompts and is now stored at `data/raw/sorry-bench-202503/question.jsonl` after approved access. The plan calls for a documented 220-prompt subset. The dataset license prohibits third-party transfers. Keep raw prompts out of GitHub and do not distribute copies to teammates who lack their own access.
 
 The server currently cannot reach huggingface.co directly. Use a trusted network route for authenticated download, or obtain explicit consent before routing an account token through a third-party mirror. Keep all tokens out of the repository and command history.
