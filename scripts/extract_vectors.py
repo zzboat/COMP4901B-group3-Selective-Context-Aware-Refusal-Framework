@@ -19,7 +19,7 @@ def main() -> None:
     parser.add_argument("--harmless-train", type=Path, default=reference / "harmless_train.json")
     parser.add_argument("--harmful-valid", type=Path, default=reference / "harmful_val.json")
     parser.add_argument("--harmless-valid", type=Path, default=reference / "harmless_val.json")
-    parser.add_argument("--output", type=Path, default=ROOT / "results/raw/surgical_vector.pt")
+    parser.add_argument("--output", type=Path, default=ROOT / "artifacts/surgical_vector.pt")
     args = parser.parse_args()
     config = json.loads((ROOT / "configs/experiment.json").read_text(encoding="utf-8"))
     engine = HFEngine(ROOT / config["model_path"], config["dtype"], config["max_new_tokens"])

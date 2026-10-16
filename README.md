@@ -13,6 +13,7 @@ Training-free, uncertainty-aware refusal repair for safety-aligned LLMs. The wor
 - `scripts/`: reproducible setup and evaluation entry points
 - `tests/`: tests for data processing and inference logic
 - `results/raw/`: per-example outputs (ignored by Git)
+- `artifacts/`: fitted method artifacts such as the Surgical vector (ignored by Git)
 - `results/tables/`, `results/figures/`: report-ready summaries
 - `docs/`: setup and methods notes
 

@@ -4,6 +4,7 @@
 /data/raw/
 /data/splits/
 /results/raw/
+/artifacts/
 /.venv
 .env
 .env.*

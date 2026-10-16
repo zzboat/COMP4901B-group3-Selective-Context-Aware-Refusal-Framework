@@ -4,37 +4,13 @@ from __future__ import annotations
 
 import argparse
 import csv
-import random
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 from refusal_repair.datasets import read_jsonl  # noqa: E402
-
-
-def paired_result(original: list[dict], changed: list[dict], metric: str, seed: int = 42) -> dict:
-    base = {row["id"]: row for row in original}
-    variant = {row["id"]: row for row in changed}
-    if len(base) != len(original) or len(variant) != len(changed) or set(base) != set(variant):
-        raise ValueError("Paired comparison requires the same unique prompt IDs")
-    ids = sorted(base)
-    differences = []
-    for key in ids:
-        if metric not in base[key] or metric not in variant[key]:
-            raise ValueError(f"Missing {metric} label for {key}")
-        differences.append(float(variant[key][metric]) - float(base[key][metric]))
-    rng = random.Random(seed)
-    draws = [sum(rng.choices(differences, k=len(ids))) / len(ids) for _ in range(2000)]
-    draws.sort()
-    return {
-        "n": len(ids),
-        "original_rate": sum(float(base[key][metric]) for key in ids) / len(ids),
-        "method_rate": sum(float(variant[key][metric]) for key in ids) / len(ids),
-        "delta": sum(differences) / len(ids),
-        "ci_low": draws[49],
-        "ci_high": draws[1949],
-    }
+from refusal_repair.evaluation import paired_result  # noqa: E402
 
 
 def main() -> None:

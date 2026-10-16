@@ -107,7 +107,9 @@ def main() -> int:
         if not (adasteer / "vectors/llama31-8b-instruct" / name).is_file():
             errors.append(f"Missing AdaSteer vector: {name}")
     generator = adasteer / "adasteer/src/main_generate_steering_multi_adasteer.py"
-    if generator.is_file() and 'attn_implementation="sdpa"' not in generator.read_text(encoding="utf-8"):
+    if not generator.is_file():
+        errors.append(f"Missing AdaSteer generator: {generator}")
+    elif 'attn_implementation="sdpa"' not in generator.read_text(encoding="utf-8"):
         errors.append("AdaSteer SDPA compatibility patch is missing")
 
     if errors:

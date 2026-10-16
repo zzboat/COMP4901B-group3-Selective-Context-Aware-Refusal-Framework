@@ -21,7 +21,7 @@ source /base/mambaforge/etc/profile.d/conda.sh
 conda activate /root/shared-nvme/COMP4091B-baselines-py39
 python -m pip install torch==2.4.1 --index-url https://download.pytorch.org/whl/cu121
 python -m pip install -r requirements-py39-cu121.lock --index-url https://pypi.tuna.tsinghua.edu.cn/simple
-python scripts/fetch_author_assets.sh
+bash scripts/fetch_author_assets.sh
 python scripts/check_readiness.py
 ```
 
@@ -33,7 +33,7 @@ AdaSteer hard-codes FlashAttention 2, which is optional and can be difficult to 
 
 ## Surgical: adapted method reproduction
 
-`scripts/extract_vectors.py` uses the Surgical authors' harmful and harmless train/validation data and this project's OR-Bench Hard extraction/validation splits. It searches residual-stream directions at the final three prompt tokens across decoder layers, subtracts the true-refusal projection from candidate false-refusal directions, filters candidates by first-token KL, and selects the candidate that most reduces pseudo-harmful refusal score on validation. The final unit vector is saved in ignored `results/raw/surgical_vector.pt`. Inference ablates that direction at all layers and token positions through removable hooks; original weights are never edited.
+`scripts/extract_vectors.py` uses the Surgical authors' harmful and harmless train/validation data and this project's OR-Bench Hard extraction/validation splits. It searches residual-stream directions at the final three prompt tokens across decoder layers, subtracts the true-refusal projection from candidate false-refusal directions, filters candidates by first-token KL, and selects the candidate that most reduces pseudo-harmful refusal score on validation. The final unit vector is saved in ignored `artifacts/surgical_vector.pt`. Inference ablates that direction at all layers and token positions through removable hooks; original weights are never edited.
 
 ```bash
 python scripts/extract_vectors.py

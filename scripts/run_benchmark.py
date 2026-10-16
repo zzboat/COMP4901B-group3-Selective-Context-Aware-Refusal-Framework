@@ -22,7 +22,7 @@ def main() -> None:
     parser.add_argument("--method", choices=METHODS, required=True)
     parser.add_argument("--split", choices=TEST_SPLITS, required=True)
     parser.add_argument("--output", type=Path)
-    parser.add_argument("--surgical-vector", type=Path, default=ROOT / "results/raw/surgical_vector.pt")
+    parser.add_argument("--surgical-vector", type=Path, default=ROOT / "artifacts/surgical_vector.pt")
     parser.add_argument("--adasteer-checkout", type=Path, default=ROOT / "third_party/AdaSteer")
     args = parser.parse_args()
     config_path = ROOT / "configs/experiment.json"

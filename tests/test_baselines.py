@@ -9,10 +9,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from refusal_repair.datasets import file_sha256, load_split, prepare_splits  # noqa: E402
-from refusal_repair.evaluation import label_response, summarize  # noqa: E402
+from refusal_repair.evaluation import label_response, paired_result, summarize  # noqa: E402
 from refusal_repair.methods.rewrite import run_rewrite  # noqa: E402
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
-from compare import paired_result  # noqa: E402
 
 
 class SplitTests(unittest.TestCase):
@@ -95,6 +93,12 @@ class RewriteAndScoreTests(unittest.TestCase):
         self.assertEqual(safe["refusal_rate"], 0.5)
         unsafe = next(row for row in result if row["label"] == "unsafe")
         self.assertEqual(unsafe["guard_unsafe_answer_rate"], 0)
+
+    def test_paired_comparison_rejects_same_id_different_prompts(self):
+        base = [{"id": "a", "prompt": "first request", "refusal_heuristic": True}]
+        changed = [{"id": "a", "prompt": "different request", "refusal_heuristic": False}]
+        with self.assertRaisesRegex(ValueError, "same prompt text"):
+            paired_result(base, changed, "refusal_heuristic")
 
     def test_paired_comparison_rejects_mismatched_ids(self):
         base = [{"id": "a", "refusal_heuristic": True}]

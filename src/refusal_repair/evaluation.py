@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 from collections import defaultdict
+import random
 
-from refusal_repair.methods.rewrite import is_refusal
+from refusal_repair.refusal import is_refusal
 
 
 class LlamaGuardJudge:
@@ -61,3 +62,31 @@ def summarize(rows: list[dict]) -> list[dict]:
             item["guard_unsafe_answer_rate"] = sum(row["guard_unsafe_answer"] for row in group) / len(group)
         result.append(item)
     return result
+
+
+def paired_result(original: list[dict], changed: list[dict], metric: str, seed: int = 42) -> dict:
+    if not original or not changed:
+        raise ValueError("Both scored files must be non-empty")
+    base = {row["id"]: row for row in original}
+    variant = {row["id"]: row for row in changed}
+    if len(base) != len(original) or len(variant) != len(changed) or set(base) != set(variant):
+        raise ValueError("Paired comparison requires the same unique prompt IDs")
+    ids = sorted(base)
+    differences = []
+    for key in ids:
+        if "prompt" not in base[key] or base[key]["prompt"] != variant[key].get("prompt"):
+            raise ValueError(f"Paired comparison requires the same prompt text for {key}")
+        if metric not in base[key] or metric not in variant[key]:
+            raise ValueError(f"Missing {metric} label for {key}")
+        differences.append(float(variant[key][metric]) - float(base[key][metric]))
+    rng = random.Random(seed)
+    draws = [sum(rng.choices(differences, k=len(ids))) / len(ids) for _ in range(2000)]
+    draws.sort()
+    return {
+        "n": len(ids),
+        "original_rate": sum(float(base[key][metric]) for key in ids) / len(ids),
+        "method_rate": sum(float(variant[key][metric]) for key in ids) / len(ids),
+        "delta": sum(differences) / len(ids),
+        "ci_low": draws[49],
+        "ci_high": draws[1949],
+    }
