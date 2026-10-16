@@ -1,0 +1,25 @@
+{
+  "datasets": [
+    {
+      "name": "XSTest prompts",
+      "path": "data/raw/xstest_prompts.csv",
+      "source": "https://github.com/paul-rottger/xstest/blob/main/xstest_prompts.csv",
+      "rows": 450,
+      "sha256": "11783fb294ed017473ee53c207d71f2161c7672c8d0b037501e78387f801cb5a"
+    },
+    {
+      "name": "OR-Bench Hard-1K",
+      "path": "data/raw/or-bench-hard-1k.csv",
+      "source": "https://huggingface.co/datasets/bench-llm/or-bench/blob/main/or-bench-hard-1k.csv",
+      "rows": 1319,
+      "sha256": "a6e2f1166416efe5901f3bb05c47dc92ab3aca3acfe143693d38b8057d841e6d"
+    },
+    {
+      "name": "OR-Bench Toxic",
+      "path": "data/raw/or-bench-toxic.csv",
+      "source": "https://huggingface.co/datasets/bench-llm/or-bench/blob/main/or-bench-toxic.csv",
+      "rows": 655,
+      "sha256": "3be45901faae3b4b2b51bf7f8a2784c1650a1cc8c631dbc8b171d5312d4e0057"
+    }
+  ]
+}

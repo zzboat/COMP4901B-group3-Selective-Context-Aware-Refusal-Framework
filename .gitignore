@@ -1,0 +1,17 @@
+# Large or licensed research assets stay on the server.
+/models
+/data/raw/
+/data/splits/
+/results/raw/
+/.venv
+.env
+.env.*
+__pycache__/
+*.py[cod]
+*.safetensors
+*.bin
+*.pth
+*.pt
+*.gguf
+*.log
+.DS_Store
