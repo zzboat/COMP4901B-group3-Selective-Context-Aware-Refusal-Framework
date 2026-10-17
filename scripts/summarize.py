@@ -7,7 +7,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
-from refusal_repair.datasets import read_jsonl  # noqa: E402
+from refusal_repair.score_files import load_scored  # noqa: E402
 from refusal_repair.evaluation import summarize  # noqa: E402
 
 
@@ -16,7 +16,7 @@ def main() -> None:
     parser.add_argument("inputs", nargs="+", type=Path)
     parser.add_argument("--output", type=Path, default=ROOT / "results/tables/baselines.csv")
     args = parser.parse_args()
-    rows = [row for path in args.inputs for row in read_jsonl(path)]
+    rows = [row for path in args.inputs for row in load_scored(ROOT, path)]
     table = summarize(rows)
     if args.output.exists():
         raise FileExistsError(f"Existing table preserved: {args.output}")

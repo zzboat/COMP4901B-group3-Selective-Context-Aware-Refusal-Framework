@@ -14,56 +14,88 @@ from refusal_repair.methods.rewrite import run_rewrite  # noqa: E402
 
 
 class SplitTests(unittest.TestCase):
-    def test_fixed_counts_balance_and_no_leakage(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            raw = root / "data/raw"
-            raw.mkdir(parents=True)
+    def setUp(self):
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        self.root = root = Path(directory.name)
+        raw = root / "data/raw"
+        raw.mkdir(parents=True)
 
-            def save_csv(name, rows, columns):
-                with (raw / name).open("w", newline="", encoding="utf-8") as handle:
-                    writer = csv.DictWriter(handle, fieldnames=columns)
-                    writer.writeheader()
-                    writer.writerows(rows)
+        def save_csv(name, rows, columns):
+            with (raw / name).open("w", newline="", encoding="utf-8") as handle:
+                writer = csv.DictWriter(handle, fieldnames=columns)
+                writer.writeheader()
+                writer.writerows(rows)
 
-            save_csv("xstest_prompts.csv", [
-                {"id": i, "prompt": f"xstest prompt {i}", "label": "safe" if i <= 250 else "unsafe"}
-                for i in range(1, 451)
-            ], ["id", "prompt", "label"])
-            save_csv("or-bench-hard-1k.csv", [
-                {"prompt": f"hard prompt {i}", "category": "test"} for i in range(1319)
-            ], ["prompt", "category"])
-            save_csv("or-bench-toxic.csv", [
-                {"prompt": f"toxic prompt {i}", "category": "test"} for i in range(655)
-            ], ["prompt", "category"])
-            (raw / "sorry-bench-202503").mkdir()
-            with (raw / "sorry-bench-202503/question.jsonl").open("w", encoding="utf-8") as handle:
-                for category in range(1, 45):
-                    for index in range(10):
-                        handle.write(json.dumps({
-                            "question_id": category * 10 + index,
-                            "category": category,
-                            "turns": [f"sorry prompt {category}-{index}"],
-                        }) + "\n")
-            entries = [
-                {"name": name, "path": str(path.relative_to(root)), "sha256": file_sha256(path)}
-                for name, path in [
-                    ("xstest", raw / "xstest_prompts.csv"),
-                    ("hard", raw / "or-bench-hard-1k.csv"),
-                    ("toxic", raw / "or-bench-toxic.csv"),
-                    ("sorry", raw / "sorry-bench-202503/question.jsonl"),
-                ]
+        save_csv("xstest_prompts.csv", [
+            {"id": i, "prompt": f"xstest prompt {i}", "label": "safe" if i <= 250 else "unsafe"}
+            for i in range(1, 451)
+        ], ["id", "prompt", "label"])
+        save_csv("or-bench-hard-1k.csv", [
+            {"prompt": f"hard prompt {i}", "category": "test"} for i in range(1319)
+        ], ["prompt", "category"])
+        save_csv("or-bench-toxic.csv", [
+            {"prompt": f"toxic prompt {i}", "category": "test"} for i in range(655)
+        ], ["prompt", "category"])
+        (raw / "sorry-bench-202503").mkdir()
+        with (raw / "sorry-bench-202503/question.jsonl").open("w", encoding="utf-8") as handle:
+            for category in range(1, 45):
+                for index in range(10):
+                    handle.write(json.dumps({
+                        "question_id": category * 10 + index,
+                        "category": category,
+                        "turns": [f"sorry prompt {category}-{index}"],
+                    }) + "\n")
+        entries = [
+            {"name": name, "path": str(path.relative_to(root)), "sha256": file_sha256(path)}
+            for name, path in [
+                ("xstest", raw / "xstest_prompts.csv"),
+                ("hard", raw / "or-bench-hard-1k.csv"),
+                ("toxic", raw / "or-bench-toxic.csv"),
+                ("sorry", raw / "sorry-bench-202503/question.jsonl"),
             ]
-            (root / "data/manifest.json").write_text(json.dumps({"datasets": entries}))
-            manifest = prepare_splits(root, seed=42)
-            self.assertEqual([manifest["splits"][name]["rows"] for name in (
-                "or_hard_extract", "or_hard_valid", "or_hard_test", "or_toxic_test",
-                "xstest_safe_test", "xstest_unsafe_test", "sorry_test",
-            )], [300, 200, 500, 600, 250, 200, 220])
-            sorry = load_split(root, "sorry_test")
-            self.assertEqual({sum(row["category"] == str(category) for row in sorry) for category in range(1, 45)}, {5})
-            first_hash = manifest["splits"]["or_hard_test"]["sha256"]
-            self.assertEqual(prepare_splits(root, seed=42)["splits"]["or_hard_test"]["sha256"], first_hash)
+        ]
+        (root / "data/manifest.json").write_text(json.dumps({"datasets": entries}))
+
+    def test_fixed_counts_balance_and_no_leakage(self):
+        root = self.root
+        manifest = prepare_splits(root, seed=42)
+        self.assertEqual([manifest["splits"][name]["rows"] for name in (
+            "or_hard_extract", "or_hard_valid", "or_hard_test", "or_toxic_test",
+            "xstest_safe_test", "xstest_unsafe_test", "sorry_test",
+        )], [300, 200, 500, 600, 250, 200, 220])
+        sorry = load_split(root, "sorry_test")
+        self.assertEqual({sum(row["category"] == str(category) for row in sorry) for category in range(1, 45)}, {5})
+        first_hash = manifest["splits"]["or_hard_test"]["sha256"]
+        self.assertEqual(prepare_splits(root, seed=42)["splits"]["or_hard_test"]["sha256"], first_hash)
+
+    def test_different_seed_preserves_every_existing_split(self):
+        prepare_splits(self.root, seed=42)
+        directory = self.root / "data/splits"
+        before = {p.name: (p.read_bytes(), p.stat().st_mtime_ns) for p in directory.iterdir()}
+        with self.assertRaisesRegex(FileExistsError, "different settings"):
+            prepare_splits(self.root, seed=43)
+        after = {p.name: (p.read_bytes(), p.stat().st_mtime_ns) for p in directory.iterdir()}
+        self.assertEqual(before, after)
+        prepare_splits(self.root, seed=42)
+        self.assertEqual(before, {p.name: (p.read_bytes(), p.stat().st_mtime_ns) for p in directory.iterdir()})
+
+    def test_changed_split_is_rejected_without_repairing_it(self):
+        prepare_splits(self.root)
+        path = self.root / "data/splits/or_hard_test.jsonl"
+        path.write_text(path.read_text() + "\n")
+        changed = path.read_bytes()
+        with self.assertRaisesRegex(ValueError, "missing or changed"):
+            prepare_splits(self.root)
+        self.assertEqual(path.read_bytes(), changed)
+
+    def test_unmanifested_split_directory_is_preserved(self):
+        path = self.root / "data/splits/or_hard_test.jsonl"
+        path.parent.mkdir()
+        path.write_text("unfinished")
+        with self.assertRaises(FileExistsError):
+            prepare_splits(self.root)
+        self.assertEqual(path.read_text(), "unfinished")
 
 
 class RewriteAndScoreTests(unittest.TestCase):

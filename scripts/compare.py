@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
-from refusal_repair.datasets import read_jsonl  # noqa: E402
+from refusal_repair.score_files import load_scored  # noqa: E402
 from refusal_repair.evaluation import paired_result  # noqa: E402
 
 
@@ -21,8 +21,8 @@ def main() -> None:
     args = parser.parse_args()
     if args.output.exists():
         raise FileExistsError(f"Existing comparison preserved: {args.output}")
-    original = read_jsonl(args.original)
-    changed = read_jsonl(args.method)
+    original = load_scored(ROOT, args.original)
+    changed = load_scored(ROOT, args.method)
     if not original or not changed:
         raise ValueError("Both scored files must be non-empty")
     if len({row["dataset"] for row in original + changed}) != 1 or len({row["label"] for row in original + changed}) != 1:

@@ -28,3 +28,8 @@ Use GitHub pull requests for code, configurations, documentation, and small summ
 ## Baseline code
 
 The shared data split, inference, Surgical, AdaSteer, and scoring entry points are described in [docs/BASELINES.md](docs/BASELINES.md). Adding the code does not start model runs; each experiment is an explicit command.
+
+## License
+
+Original project code is licensed under the [MIT License](LICENSE). Third-party code,
+model weights, and datasets retain their respective licenses and access terms.

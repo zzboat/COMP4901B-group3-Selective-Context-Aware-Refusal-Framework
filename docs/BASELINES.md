@@ -1,6 +1,6 @@
-# Baseline reproduction (code only until an experiment is authorized)
+# Baseline reproduction
 
-This repository supports five comparison rows on the same local Llama 3.1 8B Instruct checkpoint: `original`, `generic_rewrite`, `retry_rewrite`, `surgical`, and `adasteer`. The code does not run a benchmark on import or installation. The commands below are for a later experimental run.
+This repository supports five comparison rows on the same local Llama 3.1 8B Instruct checkpoint: `original`, `generic_rewrite`, `retry_rewrite`, `surgical`, and `adasteer`. The code does not run a benchmark on import or installation. Generation and scoring start only when their commands are explicitly run.
 
 ## Data protocol
 
@@ -11,6 +11,8 @@ The final test files contain the raw prompts and remain outside Git. The final S
 ```bash
 python scripts/prepare_splits.py
 ```
+
+Split preparation is idempotent: matching settings and files are verified without rewriting them. A changed seed, changed source manifest, incomplete directory, or modified split is rejected. Prepare a separate data root for a different split; existing fixed tests are never silently replaced.
 
 ## Dependency and author-code setup
 
@@ -64,6 +66,14 @@ Run each method separately on all five `*_test` splits. Existing output files ar
 
 ## Evaluation
 
+Each scored JSONL has a `.scored.manifest.json` sidecar recording the raw input hash,
+scorer source hashes, output hash, row count, and (when enabled) Guard weight and
+configuration/tokenizer hashes. Matching scores are verified and reused. Missing or
+stale provenance is rejected by scoring, summarization, and comparison commands;
+use a new `--output` path to recompute. Legacy scores made before this provenance
+format must be invalidated and rescored. Guard messages use structured text content,
+and scoring fails if its template omits the request or response.
+
 ```bash
 python scripts/score_results.py --input results/raw/original/or_hard_test.jsonl --guard
 python scripts/summarize.py results/raw/*/*.scored.jsonl
@@ -73,3 +83,11 @@ python scripts/compare.py --original results/raw/original/or_hard_test.scored.js
 The refusal regex is a screening label for over-refusal, not a measure of answer quality. `--guard` adds Llama Guard 3 1B's answer-safety label; `guard_unsafe_answer_rate` is a **proxy**, not the official SORRY-Bench harmful-compliance metric. For a paper-quality SORRY-Bench result, score the same saved answers with the [official SORRY-Bench judge](https://github.com/SORRY-Bench/sorry-bench) or a blinded human rubric and report the judge version. Manually review a stratified sample of benign answers for task completion and refusals. Do not use the same safety verifier as both a method gate and the only evaluation judge.
 
 Source methods: [Surgical paper](https://proceedings.iclr.cc/paper_files/paper/2025/file/53dbd7e34fab703a639964e2d3ee9e84-Paper-Conference.pdf), [Surgical code](https://github.com/mainlp/False-Refusal-Mitigation), [AdaSteer paper](https://aclanthology.org/2025.emnlp-main.1248.pdf), [AdaSteer code](https://github.com/MuyuenLP/AdaSteer).
+
+## Regression checks
+
+```bash
+PYTHONDONTWRITEBYTECODE=1 python -m unittest discover -v
+```
+
+The regression suite uses temporary fixtures and does not run model experiments.

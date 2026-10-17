@@ -6,6 +6,7 @@ import csv
 import hashlib
 import json
 import random
+import tempfile
 from collections import Counter, defaultdict
 from pathlib import Path
 
@@ -126,13 +127,30 @@ def prepare_splits(root: Path, seed: int = 42) -> dict:
         raise ValueError("A prompt text appears in more than one split")
 
     output_dir = root / "data/splits"
-    output_dir.mkdir(parents=True, exist_ok=True)
-    output_manifest = {"seed": seed, "source_sha256": {item["name"]: item["sha256"] for item in manifest["datasets"]}, "splits": {}}
-    for name, rows in splits.items():
-        path = output_dir / f"{name}.jsonl"
-        write_jsonl(path, rows)
-        output_manifest["splits"][name] = {"rows": len(rows), "sha256": file_sha256(path)}
-    (output_dir / "manifest.json").write_text(json.dumps(output_manifest, indent=2) + "\n", encoding="utf-8")
+    output_manifest = {
+        "seed": seed,
+        "source_sha256": {item["name"]: item["sha256"] for item in manifest["datasets"]},
+        "splits": {},
+    }
+    with tempfile.TemporaryDirectory(prefix=".splits-", dir=output_dir.parent) as directory:
+        staged = Path(directory)
+        for name, rows in splits.items():
+            path = staged / f"{name}.jsonl"
+            write_jsonl(path, rows)
+            output_manifest["splits"][name] = {"rows": len(rows), "sha256": file_sha256(path)}
+        (staged / "manifest.json").write_text(
+            json.dumps(output_manifest, indent=2) + "\n", encoding="utf-8"
+        )
+        if output_dir.exists() and any(output_dir.iterdir()):
+            existing = output_dir / "manifest.json"
+            if not existing.is_file() or json.loads(existing.read_text()) != output_manifest:
+                raise FileExistsError("Fixed splits already exist with different settings; use a separate data root")
+            for name, spec in output_manifest["splits"].items():
+                path = output_dir / f"{name}.jsonl"
+                if not path.is_file() or file_sha256(path) != spec["sha256"]:
+                    raise ValueError(f"Existing fixed split is missing or changed; preserved: {path}")
+            return output_manifest
+        staged.rename(output_dir)
     return output_manifest
 
 
