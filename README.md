@@ -29,6 +29,8 @@ Use GitHub pull requests for code, configurations, documentation, and small summ
 
 The shared data split, inference, Surgical, AdaSteer, and scoring entry points are described in [docs/BASELINES.md](docs/BASELINES.md). Adding the code does not start model runs; each experiment is an explicit command.
 
+Completed five-method safety results, paired comparisons, provenance, and reproduction commands are in [the XSTest Unsafe and SORRY-Bench report](results/tables/BASELINE_SAFETY_RESULTS.md).
+
 ## License
 
 Original project code is licensed under the [MIT License](LICENSE). Third-party code,
